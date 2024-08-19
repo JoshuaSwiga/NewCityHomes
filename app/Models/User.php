@@ -55,7 +55,9 @@ class User extends Authenticatable
         return this->hasMany(image::class);
     }
 
-
+    public function profilePhotoUrl(){
+        return config('app.url').$this->attributes['profile_photo'];
+    }
     // public function records(){
     //     return $this->hasMany(Record::class, 'custom_student_id');
     // }

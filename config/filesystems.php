@@ -20,16 +20,17 @@ return [
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
-    | Here you may configure as many filesystem "disks" as you wish, and you
-    | may even configure multiple disks of the same driver. Defaults have
-    | been set up for each driver as an example of the required values.
+    |   Below are examples of configuraions to be done.  
+    |   you can modify the configuration to reflect your storage preferences and credentials
+    | 
     |
-    | Supported Drivers: "local", "ftp", "sftp", "s3"
+    | 
     |
     */
 
     'disks' => [
 
+        // Used for local storage. Default path: storage/app/...
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
@@ -44,6 +45,15 @@ return [
             'throw' => false,
         ],
 
+        'images' => [
+            'driver' => 'local',
+            'root' => storage_path('app/images'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        // Externall dirve. Use for deployment on Amazon s3 cloud storage services. 
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -74,3 +84,5 @@ return [
     ],
 
 ];
+
+// Public path for the storage is hidden. 

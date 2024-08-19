@@ -9,6 +9,8 @@ use App\Models\Unit;
 use App\Models\Location;
 use App\Models\image;
 use App\Models\amenities;
+use Illuminate\Support\Facades\Storage;
+
 
 use Illuminate\Support\Facades\Validator;
 
@@ -63,40 +65,55 @@ class UserController extends Controller
     
         $validatedData = $data->validated();
     
-        // Define the directory path (using forward slashes for compatibility)
-        $directoryPath = public_path('Images/user/userProfile');
+        // Base path gives the root directory of the Laravel Project. We are targeting the Angular directory
+        // $directoryPath = base_path('practice with Devextrem/src/assets/images/user/userProfile');
     
-        // Check if the directory exists, if not, create it
-        if (!\File::exists($directoryPath)) {
-            \File::makeDirectory($directoryPath, 0755, true);
-        }
+        // // Check if the directory exists, if not, create it with permission 0755
+        // if (!\File::exists($directoryPath)) {
+        //     \File::makeDirectory($directoryPath, 0755, true);
+        // }
     
         // Handling profile photo if it's provided as a Base64 string
-        $profilePhotoPath = null;
+        // $profilePhotoPath = null;
+
+        
         if (!empty($validatedData['profile_photo'])) {
             // Decode the Base64 string and save it as an image
             $image = $validatedData['profile_photo'];
             $image = str_replace('data:image/jpeg;base64,', '', $image);
             $image = str_replace(' ', '+', $image);
+        
+            // Image saved with a file name that includes the current timestamp for uniqueness
             $profilePhotoName = time() . '_profile_photo.jpg';
-            \File::put($directoryPath . '/' . $profilePhotoName, base64_decode($image));
-            $profilePhotoPath = 'Images/user/userProfile/' . $profilePhotoName;
+        
+            // Define the directory path where the image will be stored (directly in storage/app/public)
+            $directoryPath = ''; // Empty string means root of 'storage/app/public'
+        
+            // Store the image in the specified directory within the 'public' disk
+            Storage::disk('local')->put($profilePhotoName, base64_decode($image));
+        
+            // Generate the public URL to access the profile photo
+            $path = Storage::url($profilePhotoName);
+        
+            // Save $path to the database
         }
-    
+        
+        
         // Correctly handling the boolean conversion for is_admin
         $isAdmin = filter_var($validatedData['is_admin'], FILTER_VALIDATE_BOOLEAN);
-    
+        
         // Create the user with the validated data
         $created_user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
+            'phone_number' => $validatedData['phone_number'],
             'password' => $validatedData['password'],
             'is_admin' => $isAdmin,
-            'profile_photo' => $profilePhotoPath ?? 'Images/user/userProfile/profilePhoto.webp', // Use default if not provided
+            'profile_photo' => $path ?? 'Images/user/userProfile/profilePhoto.webp', // Use default if not provided
             'description' => $validatedData['description'] ?? 'The user is a dedicated and passionate homeowner who has meticulously curated a selection of premium properties available for rent and sale. With a keen eye for detail and a commitment to providing exceptional living experiences, the user has become a trusted name in the real estate community. His properties are known for their modern amenities, prime locations, and impeccable upkeep.',
             'general_property_overview' => $validatedData['general_property_overview'] ?? 'The user\'s portfolio includes a diverse range of properties, from cozy apartments to spacious family homes. Each property is carefully maintained and equipped with all the necessary amenities to ensure comfort and convenience for tenants. The user prides himself on offering homes that are not just places to live, but environments where people can truly thrive.'
         ]);
-    
+        
         if ($created_user) {
             return response()->json([
                 'status' => 201,
