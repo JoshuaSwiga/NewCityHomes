@@ -13,6 +13,7 @@ class Unit extends Model
     protected $fillable =[
         'title',
         'subtitle',
+        'user_id',
         'userThatUploaded',
         'category',    
         'accomodation_information',

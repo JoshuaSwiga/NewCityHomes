@@ -56,7 +56,6 @@ class UnitController extends Controller
         ]);
     }
     
- 
     public function add_unit(Request $request)
     {
         // Getting username from headers sent
@@ -69,45 +68,16 @@ class UnitController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => 404,
-                'message' => 'User not found!'
+                'message' => 'User not found!',
             ], 404);
         }
     
-        $validation_attempt = Validator::make($request->all(), [
-            // Unit Information
-            'title' => 'required|min:5|string',
-            'subtitle' => 'required|min:1|string',
-            'category' => 'required|min:1|string',
-            'accomodation_information' => 'string|min:1',
-            'number_of_bedrooms' => 'string|min:1',
-            'number_of_bathrooms' => 'string',
-            'price_information' => '',
-    
-            // Location Data
-            'city' => 'required|min:1|string',
-            'state' => 'required|min:1|string',
-            'country' => 'required|min:1|string',
-    
-            // Image Detail
-            'image' => 'required|string',
-    
-            // Amenities Details
-            'amenities' => ''
-        ]);
-    
-        if ($validation_attempt->fails()) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Validation Failed!',
-                'errors' => $validation_attempt->errors()
-            ], 400);
-        }
         // Create unit
         $unit = Unit::create([
             'title' => $request->title,
             'subtitle' => $request->subtitle,
-            'user_id' => $user->id,
-            'userThatUploaded' => $user_name,
+            'user_id' => $user->id, // Correctly accessing the user's id
+            'userThatUploaded' => $user->name,
             'category' => $request->category,
             'accomodation_information' => $request->accomodation_information,
             'number_of_bedrooms' => $request->number_of_bedrooms,
@@ -120,18 +90,16 @@ class UnitController extends Controller
             'city' => $request->city,
             'state' => $request->state,
             'country' => $request->country,
-            'unit_id'=>$unit->id
-            
+            'unit_id' => $unit->id
         ]);
     
         // Save amenities if submitted
-        $amenitiesId = null;
+        $amenities = null;
         if ($request->amenities) {
             $amenities = Amenities::create([
                 'amenities' => $request->amenities,
-                'unit_id'=>$unit->id
+                'unit_id' => $unit->id
             ]);
-            $amenitiesId = $amenities->id;
         }
     
         // Create image and associate with unit
@@ -147,20 +115,18 @@ class UnitController extends Controller
                 'status' => 200,
                 'message' => 'Unit created successfully!',
                 'unit' => $unit,
-                'location'=>$location,
-                'image'=> $image,
-                'amenities'=>$amenities ?? "Was Not Added!"
+                'location' => $location,
+                'image' => $image,
+                'amenities' => $amenities ?? "Was Not Added!"
             ]);
-
         } else {
             return response()->json([
-                'status' => 400,
-                'message' => 'Unit Not created',
-                'error' => $unit->errors()
-            ]);
+                'status' => 500,
+                'message' => 'Unit creation failed due to an internal error.'
+            ], 500);
         }
     }
-    
+           
     public function updateUnitDetails(Request $request, $id)
 {
     $unit = Unit::find($id);

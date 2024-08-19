@@ -68,7 +68,7 @@ class unitImage extends Controller
     
         // Validate image field
         $validation_attempt = Validator::make($request->all(), [
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => '',
         ]);
     
         if ($validation_attempt->fails()) {
@@ -96,35 +96,46 @@ class unitImage extends Controller
         }
     
         // Handle the image upload
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $imagePath = $image->move(public_path('Images'), $imageName);
+        if ($request->image) { 
+            // if ($request->hasFile('image')) {
+            // $image = $request->file('image');
+            // $imageName = time() . '_' . $image->getClientOriginalName();
+            // $imagePath = $image->move(public_path('Images'), $imageName);
     
             // Save image path to the database
             $saveImageAttempt = Image::create([
-                'image' => 'Images/' . $imageName,
+                'image' => $request->image,
                 'user_id' => $userData->id,
-                'unit_id' => $unitId
+                'unit_id' => $unitId ?? 1
+
+                // 'image' => 'Images/' . $imageName,
+                // 'user_id' => $userData->id,
+                // 'unit_id' => $unitId
             ]);
-    
-            if ($saveImageAttempt) {
-                return response()->json([
-                    'status' => 201,
-                    'message' => 'Image saved successfully!',
-                    'image_path' => 'Images/' . $imageName
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 500,
-                    'message' => 'Failed to save image!'
-                ]);
-            }
-        } else {
+
             return response()->json([
-                'status' => 400,
-                'message' => 'No image file found!'
-            ], 400);
+                'status'=>201,
+                'message'=>'Test image saved'
+            ]);
+        }
+    
+        //     if ($saveImageAttempt) {
+        //         return response()->json([
+        //             'status' => 201,
+        //             'message' => 'Image saved successfully!',
+        //             'image_path' => 'Images/' . $imageName
+        //         ]);
+        //     } else {
+        //         return response()->json([
+        //             'status' => 500,
+        //             'message' => 'Failed to save image!'
+        //         ]);
+        //     }
+        // } else {
+        //     return response()->json([
+        //         'status' => 400,
+        //         'message' => 'No image file found!'
+        //     ], 400);
         }
     }
-        }
+
