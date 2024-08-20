@@ -227,6 +227,7 @@ class UserController extends Controller
 
             'name' => 'required|string|min:3|max:30',
             'email' => 'required|email|unique:users,email,' . $id, // email will be unique except for the current user's email
+            'phone_number'=>'',
             'password' => 'required|string|min:8',
             'is_admin' => 'required|boolean',
             'profile_photo' =>'',
@@ -245,6 +246,7 @@ class UserController extends Controller
             $user->update([
                 'name' => $request->name,
                 'email' => $request->email,
+                'phone_number'=>$request->phone_number,
                 'password' => $request->password,
                 'is_admin' =>  $request->is_admin,
                 'profile_photo'=>$request->profile_photo,
